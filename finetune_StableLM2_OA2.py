@@ -16,7 +16,7 @@ bs=1            # batch size
 bs_eval=8        # batch size for evals
 ga_steps=16     # gradient acc. steps
 epochs=4
-max_length=1024
+max_length=1600        # max. sample length w/o OOM on 24GB VRAM GPU
 output_dir=f"out-{run_id}"
 
 # Load model
@@ -24,7 +24,7 @@ model = AutoModelForCausalLM.from_pretrained(
     modelpath,    
     device_map={"": accelerator.process_index},
     torch_dtype=torch.bfloat16,
-    # attn_implementation="flash_attention_2",  does not work yet
+    attn_implementation="flash_attention_2", 
     trust_remote_code=True,
 )
 
@@ -107,7 +107,7 @@ args = TrainingArguments(
     per_device_eval_batch_size=bs_eval,
     evaluation_strategy="steps",
     logging_steps=1,
-    eval_steps=steps_per_epoch//2,    # 2 evals per epoch
+    eval_steps=steps_per_epoch,    # eval once per epoch
     save_steps=steps_per_epoch,     # save once per epoch
     gradient_accumulation_steps=ga_steps,
     num_train_epochs=epochs,
